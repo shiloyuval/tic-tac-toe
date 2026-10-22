@@ -95,7 +95,8 @@ input:focus-visible {
 
 #status { font-size: 1.2rem; font-weight: 600; min-height: 1.5em; margin: 0; }
 
-#new-game {
+#new-game,
+.actions button {
   padding: 0.6rem 1.4rem;
   font-size: 1rem;
   border-radius: 8px;
@@ -103,4 +104,41 @@ input:focus-visible {
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
+}
+
+.actions button:disabled { opacity: 0.5; cursor: default; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.scores {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem 0.4rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+}
+
+.score strong { font-size: 1.6rem; }
+.score-label { font-size: 0.85rem; }
+
+.scores-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  min-height: 1.25em;
+  font-size: 0.85rem;
 }

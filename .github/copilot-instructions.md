@@ -1,12 +1,13 @@
 # Project Rules — Tic-Tac-Toe
 
-These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI) and [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version).
+These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version) and [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume).
 
 ## 1. Technology
 
 - TypeScript (strict), ES modules, Node.js, npm.
 - Tests: Vitest. Dev runner: `tsx`. Web bundler/dev server: Vite.
-- The web frontend is vanilla TypeScript + HTML + CSS. No frontend framework, no database, no backend.
+- The web frontend is vanilla TypeScript + HTML + CSS. No frontend framework and no database.
+- Persistence is a single JSON file (`data/game-data.json`, gitignored, path overridable with `GAME_DATA_FILE`). The only backend is a small `node:http` server (`src/server`) that exposes it to the browser.
 - Add a dependency only when the task requires it. Avoid unnecessary abstractions.
 - Never use `any` without a documented, compelling reason.
 - `tsconfig.json` must keep `strict` and `noUncheckedIndexedAccess` enabled.
@@ -17,16 +18,19 @@ These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.m
 src/game.ts       Core rules and state (pure, no Node/browser APIs)
 src/computer.ts   Minimax computer opponent (pure)
 src/mode.ts       Shared GameMode type and COMPUTER_PLAYER constant
+src/storage/      model.ts (pure scores/paused-game model and validation), gameStore.ts (Node-only JSON file store)
+src/server/       node:http API for the browser (+ serves dist/ in production)
 src/cli.ts        Console UI (Node only)
 src/index.ts      Console entry point and top-level error handling
-src/web/          Browser UI: controller.ts (DOM-free flow), view.ts (rendering), main.ts (wiring), styles.css
+src/web/          Browser UI: controller.ts (DOM-free flow), apiClient.ts (fetch), view.ts (rendering), main.ts (wiring), styles.css
 index.html        Vite entry
-tests/            Vitest tests (tests/web for the web controller)
+tests/            Vitest tests (tests/web, tests/storage, tests/server)
 ```
 
 - All game rules live in `game.ts`. UIs must not detect winners, validate moves, or modify the board themselves.
 - Never duplicate winner-detection logic; use `checkWinner()` / `getWinningLine()`.
-- `game.ts`, `computer.ts` and `mode.ts` must not import Node or browser APIs.
+- `game.ts`, `computer.ts`, `mode.ts` and `storage/model.ts` must not import Node or browser APIs.
+- `gameStore.ts` and `src/server/*` are Node-only and must never be imported from `src/web/*`; the web talks to storage only over HTTP.
 - `src/web/*` must not import `cli.ts` or `node:*` modules. `cli.ts` must not use the DOM.
 - `src/web/controller.ts` stays DOM-free so it can be unit-tested; `view.ts` only renders and contains no game rules.
 - Importing a module must never start the game automatically.
@@ -42,6 +46,15 @@ tests/            Vitest tests (tests/web for the web controller)
 - After a win or draw, `currentPlayer` stays the player who made the last move.
 - Vs-computer mode: the human is X, the computer is O. The computer must never lose.
 
+## 3b. Scores and pause
+
+- Only two identities exist: Player 1 (X) and Player 2 (O). No accounts or names.
+- Only finished **two-player** games are recorded (`shouldRecord`), exactly once, together with clearing any saved paused game. Games against the computer never change the scores.
+- A game can be paused only while in progress (both modes). The paused game (board, turn, mode) is saved, loaded on the next start, and resumed or discarded by the user. Nothing is saved unless the user pauses.
+- The scores are shown above the board in the web UI and printed at the start and end of a console game.
+- Saved data is never trusted: it is validated on load (`parseGameData`), corrupt files are moved aside, and storage failures must never stop a game from being played.
+- Writes are atomic and serialized.
+
 ## 4. Coding conventions
 
 - Small, focused functions with clear names; readable and type-safe code.
@@ -55,7 +68,8 @@ tests/            Vitest tests (tests/web for the web controller)
 - Keyboard accessible (native `<button>`s, visible focus), responsive, with an `aria-live` status line.
 - Block input while the computer is "thinking"; changing mode or resetting cancels a pending computer move.
 - Highlight the winning line; disable occupied cells and the whole board when the game is over.
-- Out of scope: online multiplayer, accounts, persistence, difficulty levels.
+- Out of scope: online multiplayer, accounts, difficulty levels.
+- Scores panel sits directly above the board; Pause/Resume, New game and Reset scores are native buttons. Confirm before discarding a saved paused game or resetting scores. The game must stay playable when the API is unavailable (Pause and scores disabled with a visible note).
 
 ## 6. Testing
 
@@ -63,16 +77,18 @@ tests/            Vitest tests (tests/web for the web controller)
 - Use descriptive test names, group with `describe()`, and do not depend on test execution order.
 - Test public behavior, not private implementation details.
 - Core coverage: initial state, valid/invalid moves, all 8 winning lines for both players, draws, and immutability.
-- Web controller tests use fake timers instead of a real DOM.
+- Web controller tests use fake timers and a fake API client instead of a real DOM or server. Store and server tests use a temporary directory and never touch the real `data/` folder.
 
 ## 7. Commands
 
 | Command | Purpose |
 |---|---|
-| `npm run play` / `npm start` / `npm run dev` | Run the console game |
-| `npm run dev:web` | Start the web dev server |
+| `npm run play` / `npm start` / `npm run dev` | Run the console game (uses `data/game-data.json`) |
+| `npm run server` | Start the scores/pause API on `127.0.0.1:3001` (`PORT`, `GAME_DATA_FILE`) |
+| `npm run dev:web` | Start the web dev server (proxies `/api` to the API server) |
 | `npm run build:web` | Production build of the web app |
-| `npm run preview:web` | Serve the production build |
+| `npm run start:web` | Build, then serve the app and API from one server |
+| `npm run preview:web` | Serve the production build (without the API) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | `vitest run` |
 

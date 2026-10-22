@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Saved scores and paused game
+data/
+
 # Build output
 dist/
 build/

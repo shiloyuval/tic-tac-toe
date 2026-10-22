@@ -8,6 +8,12 @@
   <body>
     <main>
       <h1>Tic-Tac-Toe</h1>
+      <section id="scores" class="scores" aria-label="Scores" aria-live="polite">
+        <div class="score"><span class="score-label">Player 1 (X)</span><strong id="score-player1">–</strong></div>
+        <div class="score"><span class="score-label">Player 2 (O)</span><strong id="score-player2">–</strong></div>
+        <div class="score"><span class="score-label">Draws</span><strong id="score-draws">–</strong></div>
+        <p id="scores-note" class="scores-note"></p>
+      </section>
       <fieldset class="modes">
         <legend class="visually-hidden">Game mode</legend>
         <label><input type="radio" name="mode" value="two-players" checked /> Two players</label>
@@ -25,7 +31,11 @@
         <button class="cell" data-position="8"></button>
       </div>
       <p id="status" aria-live="polite"></p>
-      <button id="new-game" type="button">New game</button>
+      <div class="actions">
+        <button id="pause" type="button">Pause</button>
+        <button id="new-game" type="button">New game</button>
+        <button id="reset-scores" type="button">Reset scores</button>
+      </div>
     </main>
     <script type="module" src="/src/web/main.ts"></script>
   </body>

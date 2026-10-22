@@ -16,7 +16,7 @@ The implementation must be simple, readable, type-safe, modular, and easy to tes
 - Package manager: npm.
 - Testing: Vitest.
 - Do not use `any` unless there is a documented, compelling reason.
-- Do not introduce a frontend framework or database.
+- Do not introduce a frontend framework or a database. Scores and the paused game are stored in a JSON file (see `tic-tac-toe-persistent.md`).
 - Separate game logic, user interaction, and application startup.
 - Use small, focused functions with clear names.
 - Avoid unnecessary abstractions and dependencies.

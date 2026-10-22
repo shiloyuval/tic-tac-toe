@@ -7,7 +7,7 @@ Turn the existing console Tic-Tac-Toe game into a game playable in the browser, 
 ## 2. Decisions
 
 - **Frontend:** Vanilla TypeScript + HTML + CSS, bundled by **Vite** (Vite is already in `package.json`). No framework: the UI is one board, a mode selector, and a status line, so a framework adds nothing.
-- **No backend:** `game.ts` and `computer.ts` are pure and have no Node dependencies, so they run directly in the browser. The minimax search on a 3×3 board is instant.
+- **No backend for the game itself:** `game.ts` and `computer.ts` are pure and have no Node dependencies, so they run directly in the browser. The minimax search on a 3×3 board is instant. (Scores and the paused game are stored by a small Node server, see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md).)
 - **Constraints from `tic-tac-toe.md` still apply:** TypeScript, ES modules, npm, Vitest, no `any`, small focused functions.
 - **Reuse, don't copy:** the web code imports from `src/game.ts` and `src/computer.ts`. Don't import `cli.ts` (it uses `node:readline`).
 
@@ -95,4 +95,4 @@ Framework-free and DOM-free so it is unit-testable.
 
 ## 6. Out of scope
 
-Online multiplayer, accounts, persistence, a backend server, difficulty levels, and animations beyond simple CSS transitions.
+Online multiplayer, accounts, difficulty levels, and animations beyond simple CSS transitions. (Persistence was added later; see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md).)
