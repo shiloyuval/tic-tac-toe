@@ -1,5 +1,9 @@
 # Tic-Tac-Toe Persistence — Mission File
 
+## Related plans
+
+- Hosting and browser storage: [tic-tac-toe-github.md](./tic-tac-toe-github.md). The web build now keeps scores in `localStorage`; the Node server described here is used by the console game and by `--mode api` builds.
+
 ## 1. Mission
 
 Add persistent storage to the game so that:

@@ -4,14 +4,14 @@ import type { Board, GameState } from "../../src/game.js";
 import type { GameMode } from "../../src/mode.js";
 import { createEmptyGameData, pauseGame, recordOutcome } from "../../src/storage/model.js";
 import type { GameData, Outcome } from "../../src/storage/model.js";
-import type { ApiClient } from "../../src/web/apiClient.js";
+import type { GameStorage } from "../../src/web/gameStorage.js";
 import { createController } from "../../src/web/controller.js";
 import type { Controller } from "../../src/web/controller.js";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-interface FakeApi extends ApiClient {
+interface FakeApi extends GameStorage {
   data: GameData;
   calls: string[];
   failing: boolean;
@@ -48,7 +48,7 @@ function createFakeApi(initial: GameData = createEmptyGameData()): FakeApi {
 }
 
 async function startController(api: FakeApi | null, delayMs = 100): Promise<Controller> {
-  const controller = createController({ api, onChange: () => {}, delayMs });
+  const controller = createController({ storage: api, onChange: () => {}, delayMs });
   await controller.init();
   return controller;
 }
@@ -219,7 +219,7 @@ describe("web controller (scores)", () => {
 
   it("blocks moves while loading", () => {
     const api = createFakeApi();
-    const c = createController({ api, onChange: () => {} });
+    const c = createController({ storage: api, onChange: () => {} });
     expect(c.getViewModel().locked).toBe(true);
   });
 });

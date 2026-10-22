@@ -5,7 +5,7 @@ import { COMPUTER_PLAYER } from "../mode.js";
 import type { GameMode } from "../mode.js";
 import { outcomeOf, shouldRecord } from "../storage/model.js";
 import type { GameData, Scores } from "../storage/model.js";
-import type { ApiClient } from "./apiClient.js";
+import type { GameStorage } from "./gameStorage.js";
 
 export type Persistence = "loading" | "available" | "unavailable";
 
@@ -34,7 +34,7 @@ export interface Controller {
 }
 
 export interface ControllerOptions {
-  api: ApiClient | null;
+  storage: GameStorage | null;
   onChange: () => void;
   delayMs?: number;
 }
@@ -46,7 +46,7 @@ function describeError(error: unknown): string {
 }
 
 export function createController({
-  api,
+  storage,
   onChange,
   delayMs = COMPUTER_DELAY_MS,
 }: ControllerOptions): Controller {
@@ -58,13 +58,13 @@ export function createController({
   let paused = false;
   let hasSavedGame = false;
   let scores: Scores | null = null;
-  let persistence: Persistence = api === null ? "unavailable" : "loading";
+  let persistence: Persistence = storage === null ? "unavailable" : "loading";
 
-  // Storage calls run in order so a quick pause followed by resume cannot reach the server reversed.
+  // Storage calls run in order so a quick pause followed by resume cannot be applied reversed.
   let queue: Promise<unknown> = Promise.resolve();
-  function persist<T>(operation: (client: ApiClient) => Promise<T>): Promise<T> {
-    if (api === null) return Promise.reject(new Error("Storage is unavailable."));
-    const client = api;
+  function persist<T>(operation: (client: GameStorage) => Promise<T>): Promise<T> {
+    if (storage === null) return Promise.reject(new Error("Storage is unavailable."));
+    const client = storage;
     const result = queue.then(() => operation(client));
     queue = result.catch(() => undefined);
     return result;
@@ -140,7 +140,7 @@ export function createController({
     }),
 
     async init() {
-      if (api === null) {
+      if (storage === null) {
         onChange();
         return;
       }

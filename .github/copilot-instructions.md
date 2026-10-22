@@ -1,13 +1,14 @@
 # Project Rules — Tic-Tac-Toe
 
-These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version) and [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume).
+These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version), [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume) and [tic-tac-toe-github.md](../tic-tac-toe-github.md) (GitHub Pages hosting).
 
 ## 1. Technology
 
 - TypeScript (strict), ES modules, Node.js, npm.
 - Tests: Vitest. Dev runner: `tsx`. Web bundler/dev server: Vite.
 - The web frontend is vanilla TypeScript + HTML + CSS. No frontend framework and no database.
-- Persistence is a single JSON file (`data/game-data.json`, gitignored, path overridable with `GAME_DATA_FILE`). The only backend is a small `node:http` server (`src/server`) that exposes it to the browser.
+- Persistence has two interchangeable backends behind the `GameStorage` interface (`src/web/gameStorage.ts`): the browser's `localStorage` (default, used by the GitHub Pages build) and a single JSON file (`data/game-data.json`, gitignored, path overridable with `GAME_DATA_FILE`) exposed by a small `node:http` server (`src/server`) in `--mode api`. The console game always uses the JSON file.
+- The hosted site is deployed by `.github/workflows/deploy.yml` (typecheck, tests, build, GitHub Pages). Keep `base: "./"` in `vite.config.ts`, keep `npm ci` working on Linux, and do not add platform-specific packages as direct dependencies.
 - Add a dependency only when the task requires it. Avoid unnecessary abstractions.
 - Never use `any` without a documented, compelling reason.
 - `tsconfig.json` must keep `strict` and `noUncheckedIndexedAccess` enabled.
@@ -22,7 +23,7 @@ src/storage/      model.ts (pure scores/paused-game model and validation), gameS
 src/server/       node:http API for the browser (+ serves dist/ in production)
 src/cli.ts        Console UI (Node only)
 src/index.ts      Console entry point and top-level error handling
-src/web/          Browser UI: controller.ts (DOM-free flow), apiClient.ts (fetch), view.ts (rendering), main.ts (wiring), styles.css
+src/web/          Browser UI: controller.ts (DOM-free flow), gameStorage.ts (storage interface), localStorageClient.ts and apiClient.ts (implementations), view.ts (rendering), main.ts (wiring, picks the storage), styles.css
 index.html        Vite entry
 tests/            Vitest tests (tests/web, tests/storage, tests/server)
 ```
@@ -69,7 +70,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - Block input while the computer is "thinking"; changing mode or resetting cancels a pending computer move.
 - Highlight the winning line; disable occupied cells and the whole board when the game is over.
 - Out of scope: online multiplayer, accounts, difficulty levels.
-- Scores panel sits directly above the board; Pause/Resume, New game and Reset scores are native buttons. Confirm before discarding a saved paused game or resetting scores. The game must stay playable when the API is unavailable (Pause and scores disabled with a visible note).
+- Scores panel sits directly above the board; Pause/Resume, New game and Reset scores are native buttons. Confirm before discarding a saved paused game or resetting scores. The game must stay playable when storage is unavailable (blocked `localStorage` or no API: Pause and scores disabled with a visible note).
 
 ## 6. Testing
 
@@ -77,7 +78,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - Use descriptive test names, group with `describe()`, and do not depend on test execution order.
 - Test public behavior, not private implementation details.
 - Core coverage: initial state, valid/invalid moves, all 8 winning lines for both players, draws, and immutability.
-- Web controller tests use fake timers and a fake API client instead of a real DOM or server. Store and server tests use a temporary directory and never touch the real `data/` folder.
+- Web controller tests use fake timers and a fake storage instead of a real DOM or server. The `localStorage` client is tested with an in-memory `Storage` fake. Store and server tests use a temporary directory and never touch the real `data/` folder.
 
 ## 7. Commands
 
@@ -85,10 +86,12 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 |---|---|
 | `npm run play` / `npm start` / `npm run dev` | Run the console game (uses `data/game-data.json`) |
 | `npm run server` | Start the scores/pause API on `127.0.0.1:3001` (`PORT`, `GAME_DATA_FILE`) |
-| `npm run dev:web` | Start the web dev server (proxies `/api` to the API server) |
-| `npm run build:web` | Production build of the web app |
-| `npm run start:web` | Build, then serve the app and API from one server |
-| `npm run preview:web` | Serve the production build (without the API) |
+| `npm run dev:web` | Start the web dev server (browser storage, no server needed) |
+| `npm run dev:web:api` | Web dev server using the API server (proxies `/api`) |
+| `npm run build:web` | Hosted production build (browser storage), as deployed to GitHub Pages |
+| `npm run build:web:api` | Production build that talks to the API server |
+| `npm run start:web` | Build in API mode, then serve the app and API from one server |
+| `npm run preview:web` | Serve the production build locally |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | `vitest run` |
 

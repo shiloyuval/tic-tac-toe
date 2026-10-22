@@ -2,8 +2,17 @@ import "./styles.css";
 import type { GameMode } from "../mode.js";
 import { createApiClient } from "./apiClient.js";
 import { createController } from "./controller.js";
+import type { GameStorage } from "./gameStorage.js";
+import { createLocalStorageClient, getBrowserStorage } from "./localStorageClient.js";
 import { render } from "./view.js";
 import type { Elements } from "./view.js";
+
+// `vite --mode api` talks to the Node server; the default (hosted) build keeps data in the browser.
+function createStorage(): GameStorage | null {
+  if (import.meta.env.MODE === "api") return createApiClient();
+  const browserStorage = getBrowserStorage();
+  return browserStorage === null ? null : createLocalStorageClient(browserStorage);
+}
 
 function requireElement<T extends Element>(selector: string): T {
   const el = document.querySelector<T>(selector);
@@ -26,7 +35,7 @@ const els: Elements = {
 };
 
 const controller = createController({
-  api: createApiClient(),
+  storage: createStorage(),
   onChange: () => render(els, controller.getViewModel()),
 });
 

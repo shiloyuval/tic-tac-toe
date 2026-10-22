@@ -18,7 +18,7 @@ function scoreText(scores: Scores | null, key: keyof Scores): string {
 
 function scoresNote(vm: ViewModel): string {
   if (vm.persistence === "loading") return "Loading scores…";
-  if (vm.persistence === "unavailable") return "Scores and pause are unavailable (is the server running?).";
+  if (vm.persistence === "unavailable") return "Scores and pause are unavailable (saving is not possible here).";
   if (vm.mode === "computer") return "Games against the computer are not scored.";
   return "";
 }

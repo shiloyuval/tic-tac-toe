@@ -22,28 +22,36 @@ npm run play
 
 ## Play in the browser
 
-Development (two terminals):
+Hosted version: **https://shiloyuval.github.io/tic-tac-toe/** (after the one-time GitHub Pages setup below).
 
 ```
-npm run server      # API on http://127.0.0.1:3001
-npm run dev:web     # Vite dev server, proxies /api to the API
+npm run dev:web     # Vite dev server, no other server needed
 ```
 
-Production-style (one command, serves the built app and the API):
+In the browser the scores and a paused game are kept in the browser's `localStorage`, per browser and device. They are not shared with other visitors or with the console game. If the browser blocks storage, the game is still playable but scores and pause are unavailable.
+
+To share the scores and the paused game with the console game instead, use the server-backed mode, which keeps them in `data/game-data.json`:
 
 ```
-npm run start:web   # http://127.0.0.1:3001
+npm run server        # API on http://127.0.0.1:3001
+npm run dev:web:api   # Vite dev server using the API (proxies /api)
+npm run start:web     # or: build in API mode and serve everything on http://127.0.0.1:3001
 ```
 
 - The scores are shown above the board. **Pause** saves the game; after a reload or restart it is loaded in a paused state and you can **Resume** or start a **New game**.
 - **Reset scores** clears the scoreboard.
-- If the server is not running, the game is still playable, but scores and pause are unavailable.
+
+## Publish on GitHub Pages
+
+The workflow [.github/workflows/deploy.yml](./.github/workflows/deploy.yml) runs the type check and the tests on every push to `main`, builds the hosted version (`npm run build:web`) and deploys it to GitHub Pages. A failing check blocks the deployment.
+
+One-time setup: in the repository open **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. Then push to `main` (or run the workflow manually from the **Actions** tab). The build uses relative asset paths, so it also works on other static hosts such as Cloudflare Pages or Netlify (build command `npm run build:web`, output folder `dist`).
 
 ## Scores and saved games
 
 - Only finished two-player games are scored. Games against the computer are not.
-- Data is stored in `data/game-data.json` (gitignored). Set `GAME_DATA_FILE` to use another file and `PORT` to change the server port.
-- A corrupt data file is moved aside as `game-data.json.corrupt-<timestamp>` and a fresh one is started.
+- Console and server mode: data is stored in `data/game-data.json` (gitignored). Set `GAME_DATA_FILE` to use another file and `PORT` to change the server port. A corrupt data file is moved aside as `game-data.json.corrupt-<timestamp>` and a fresh one is started.
+- Hosted mode: data is stored in `localStorage` under the key `tic-tac-toe:game-data`; an unreadable value is kept under `tic-tac-toe:game-data:corrupt` and a fresh one is started.
 
 ## Development
 
@@ -60,8 +68,9 @@ src/game.ts, computer.ts, mode.ts   Game rules, minimax opponent, shared mode ty
 src/storage/                        Scores/paused-game model (pure) and JSON file store
 src/server/                         Small HTTP API for the browser
 src/cli.ts, index.ts                Console UI and entry point
-src/web/                            Browser UI (controller, view, API client)
+src/web/                            Browser UI (controller, view, localStorage and API storage)
 tests/                              Vitest tests
+.github/workflows/deploy.yml        Test, build and deploy to GitHub Pages
 ```
 
-More detail: [tic-tac-toe.md](./tic-tac-toe.md), [tic-tac-toe-web.md](./tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).
+More detail: [tic-tac-toe.md](./tic-tac-toe.md), [tic-tac-toe-web.md](./tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md), [tic-tac-toe-github.md](./tic-tac-toe-github.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).
