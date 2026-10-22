@@ -2,11 +2,9 @@ import { createInterface } from "node:readline/promises";
 import type { Interface } from "node:readline/promises";
 import { chooseComputerMove } from "./computer.js";
 import { createGame, getGameResult, makeMove } from "./game.js";
-import type { Board, GameState, Player } from "./game.js";
-
-type GameMode = "two-players" | "computer";
-
-const COMPUTER_PLAYER: Player = "O";
+import type { Board, GameState } from "./game.js";
+import { COMPUTER_PLAYER } from "./mode.js";
+import type { GameMode } from "./mode.js";
 
 export function renderBoard(board: Board): string {
   const labels = board.map((cell, index) => cell ?? String(index));

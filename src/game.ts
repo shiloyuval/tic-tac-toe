@@ -47,6 +47,17 @@ export function checkWinner(board: Board): Player | null {
   return null;
 }
 
+export function getWinningLine(board: Board): [number, number, number] | null {
+  for (const line of winningCombinations) {
+    const [a, b, c] = line;
+    const cell = board[a] ?? null;
+    if (cell !== null && cell === board[b] && cell === board[c]) {
+      return line;
+    }
+  }
+  return null;
+}
+
 export function isBoardFull(board: Board): boolean {
   return board.every((cell) => cell !== null);
 }
