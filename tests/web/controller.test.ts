@@ -129,22 +129,17 @@ describe("web controller (vs computer)", () => {
     expect(c.getViewModel().state.board.every((cell) => cell === null)).toBe(true);
   });
 
-  it("never loses against varied human move sequences", async () => {
+  it("can lose to a human who plays a winning line", async () => {
     const c = await startController(null, 1);
     c.setMode("computer");
-    for (let seed = 0; seed < 20; seed++) {
-      c.reset();
-      let n = seed;
-      while (c.getViewModel().state.status === "in-progress") {
-        const empty = c
-          .getViewModel()
-          .state.board.flatMap((cell, i) => (cell === null ? [i] : []));
-        c.playerMove(empty[n % empty.length] as number);
-        n += 3;
-        vi.advanceTimersByTime(1);
-      }
-      expect(c.getViewModel().state.winner).not.toBe("X");
-    }
+    c.playerMove(4);
+    vi.advanceTimersByTime(1);
+    c.playerMove(2);
+    vi.advanceTimersByTime(1);
+    c.playerMove(6);
+
+    expect(c.getViewModel().state.status).toBe("won");
+    expect(c.getViewModel().state.winner).toBe("X");
   });
 });
 

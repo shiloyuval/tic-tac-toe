@@ -2,12 +2,12 @@
 
 ## 1. Mission
 
-Turn the existing console Tic-Tac-Toe game into a game playable in the browser, reusing the existing pure game logic (`src/game.ts`) and computer opponent (`src/computer.ts`) unchanged. The console version must keep working.
+Turn the existing console Tic-Tac-Toe game into a game playable in the browser, reusing the existing pure game logic (`src/game.ts`) and computer opponent (`src/computer.ts`). The console version must keep working.
 
 ## 2. Decisions
 
 - **Frontend:** Vanilla TypeScript + HTML + CSS, bundled by **Vite** (Vite is already in `package.json`). No framework: the UI is one board, a mode selector, and a status line, so a framework adds nothing.
-- **No backend for the game itself:** `game.ts` and `computer.ts` are pure and have no Node dependencies, so they run directly in the browser. The minimax search on a 3×3 board is instant. (Scores and the paused game are stored by a small Node server, see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md).)
+- **No backend for the game itself:** `game.ts` and `computer.ts` are pure and have no Node dependencies, so they run directly in the browser. (Scores and the paused game are stored by a small Node server, see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md).)
 - **Constraints from `tic-tac-toe.md` still apply:** TypeScript, ES modules, npm, Vitest, no `any`, small focused functions.
 - **Reuse, don't copy:** the web code imports from `src/game.ts` and `src/computer.ts`. Don't import `cli.ts` (it uses `node:readline`).
 
@@ -71,7 +71,7 @@ Framework-free and DOM-free so it is unit-testable.
   - human move updates the board and switches turn;
   - occupied cell and post-game moves yield an error and no state change;
   - in computer mode the computer replies as O and input is blocked while it thinks;
-  - the computer never loses (a play-through against a scripted human);
+  - a player can beat the computer (a play-through against its predictable move policy);
   - reset and mode change start a fresh game.
 - Optional: a DOM render test with `jsdom` / `happy-dom` (dev dependency) and/or a Playwright smoke test.
 
@@ -85,7 +85,7 @@ Framework-free and DOM-free so it is unit-testable.
 ## 5. Acceptance criteria
 
 - [ ] `npm run dev:web` opens a playable game in the browser.
-- [ ] Both modes work: two players, and vs. the (unbeatable) computer as O.
+- [ ] Both modes work: two players, and vs. the beatable computer as O.
 - [ ] Illegal moves are impossible or clearly reported; no moves after game end.
 - [ ] The winner, draw and current turn are always shown; the winning line is highlighted.
 - [ ] "New game" resets the board; changing mode resets the game.

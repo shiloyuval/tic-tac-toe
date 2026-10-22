@@ -1,6 +1,6 @@
 # Tic-Tac-Toe
 
-Tic-Tac-Toe in TypeScript, playable in the console or in the browser, against another person or against an unbeatable computer. Scores and a paused game are saved between sessions.
+Tic-Tac-Toe in TypeScript, playable in the console or in the browser, against another person or a beatable computer. Scores and a paused game are saved between sessions.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ One-time setup: in the repository open **Settings → Pages → Build and deploy
 ## Project structure
 
 ```
-src/game.ts, computer.ts, mode.ts   Game rules, minimax opponent, shared mode types (pure)
+src/game.ts, computer.ts, mode.ts   Game rules, simple computer opponent, shared mode types (pure)
 src/storage/                        Scores/paused-game model (pure) and JSON file store
 src/server/                         Small HTTP API for the browser
 src/cli.ts, index.ts                Console UI and entry point

@@ -26,23 +26,9 @@ function humanCanBeatComputer(state: GameState): boolean {
 }
 
 describe("chooseComputerMove", () => {
-  it("returns an empty position", () => {
+  it("chooses the first empty position", () => {
     const state = play([4]);
-    const move = chooseComputerMove(state);
-    expect(emptyPositions(state)).toContain(move);
-  });
-
-  it("takes an immediate win", () => {
-    // O has 3 and 4; X has 0 and 1. O to move and wins at 5.
-    const state = play([0, 3, 1, 4, 8]);
-    expect(state.currentPlayer).toBe("O");
-    expect(chooseComputerMove(state)).toBe(5);
-  });
-
-  it("blocks the opponent's immediate win", () => {
-    // X has 0 and 1 and threatens 2; O to move must block.
-    const state = play([0, 4, 1]);
-    expect(chooseComputerMove(state)).toBe(2);
+    expect(chooseComputerMove(state)).toBe(0);
   });
 
   it("does not modify the state it is given", () => {
@@ -57,7 +43,18 @@ describe("chooseComputerMove", () => {
     expect(() => chooseComputerMove(won)).toThrow(/already over/i);
   });
 
-  it("never loses when playing O against every possible human strategy", () => {
-    expect(humanCanBeatComputer(createGame())).toBe(false);
+  it("can be beaten by a player who makes a winning line", () => {
+    let state = makeMove(createGame(), 4);
+    state = makeMove(state, chooseComputerMove(state));
+    state = makeMove(state, 2);
+    state = makeMove(state, chooseComputerMove(state));
+    state = makeMove(state, 6);
+
+    expect(state.status).toBe("won");
+    expect(state.winner).toBe("X");
+  });
+
+  it("can be beaten against a human strategy tree", () => {
+    expect(humanCanBeatComputer(createGame())).toBe(true);
   });
 });

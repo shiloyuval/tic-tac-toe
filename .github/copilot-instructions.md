@@ -45,7 +45,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - A full board with no winner is a draw. A full board with a winning line is a win, not a draw.
 - No moves into occupied cells, outside `0–8`, with non-integers, or after the game has ended.
 - After a win or draw, `currentPlayer` stays the player who made the last move.
-- Vs-computer mode: the human is X, the computer is O. The computer must never lose.
+- Vs-computer mode: the human is X, the computer is O. The computer is intentionally beatable and picks the first available position.
 
 ## 3b. Scores and pause
 
