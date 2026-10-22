@@ -1,6 +1,6 @@
 # Tic-Tac-Toe
 
-Tic-Tac-Toe in TypeScript, playable in the console or in the browser, against another person or a beatable computer. Scores and a paused game are saved between sessions.
+Tic-Tac-Toe in TypeScript, playable in the console or in the browser, against another person or against a computer with three difficulty levels. Scores and a paused game are saved between sessions.
 
 ## Requirements
 
@@ -41,6 +41,18 @@ npm run start:web     # or: build in API mode and serve everything on http://127
 - The scores are shown above the board. **Pause** saves the game; after a reload or restart it is loaded in a paused state and you can **Resume** or start a **New game**.
 - **Reset scores** clears the scoreboard.
 
+## Computer difficulty
+
+When you play against the computer (you are X, it is O) you choose a level:
+
+| Level | Behavior |
+|---|---|
+| Easy | Plays a random free cell. |
+| Medium (default) | Wins or blocks when it can, otherwise plays randomly. Beatable with a fork. |
+| Hard | Perfect play (minimax). It never loses. |
+
+In the console you are asked for the level after choosing the computer mode. In the browser the level selector appears next to the mode selector; changing the level starts a new game. A paused game resumes at the same level. See [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md).
+
 ## Publish on GitHub Pages
 
 The workflow [.github/workflows/deploy.yml](./.github/workflows/deploy.yml) runs the type check and the tests on every push to `main`, builds the hosted version (`npm run build:web`) and deploys it to GitHub Pages. A failing check blocks the deployment.
@@ -64,7 +76,7 @@ One-time setup: in the repository open **Settings → Pages → Build and deploy
 ## Project structure
 
 ```
-src/game.ts, computer.ts, mode.ts   Game rules, simple computer opponent, shared mode types (pure)
+src/game.ts, computer.ts, mode.ts   Game rules, computer opponent (Easy/Medium/Hard), shared mode types (pure)
 src/storage/                        Scores/paused-game model (pure) and JSON file store
 src/server/                         Small HTTP API for the browser
 src/cli.ts, index.ts                Console UI and entry point
@@ -73,4 +85,4 @@ tests/                              Vitest tests
 .github/workflows/deploy.yml        Test, build and deploy to GitHub Pages
 ```
 
-More detail: [tic-tac-toe.md](./tic-tac-toe.md), [tic-tac-toe-web.md](./tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md), [tic-tac-toe-github.md](./tic-tac-toe-github.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).
+More detail: [tic-tac-toe.md](./tic-tac-toe.md), [tic-tac-toe-web.md](./tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md), [tic-tac-toe-github.md](./tic-tac-toe-github.md), [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).

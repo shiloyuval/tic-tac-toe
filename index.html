@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tic-Tac-Toe</title>
-    <meta name="description" content="Play Tic-Tac-Toe with a friend or against an unbeatable computer. Scores and paused games are saved in your browser." />
+    <meta name="description" content="Play Tic-Tac-Toe with a friend or against an easy, medium or hard computer. Scores and paused games are saved in your browser." />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23fff'/%3E%3Cpath d='M14 14l36 36M50 14L14 50' stroke='%23d6336c' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E" />
   </head>
   <body>
@@ -20,6 +20,12 @@
         <legend class="visually-hidden">Game mode</legend>
         <label><input type="radio" name="mode" value="two-players" checked /> Two players</label>
         <label><input type="radio" name="mode" value="computer" /> Vs computer</label>
+      </fieldset>
+      <fieldset id="difficulty" class="modes" hidden>
+        <legend class="visually-hidden">Computer difficulty</legend>
+        <label><input type="radio" name="difficulty" value="easy" /> Easy</label>
+        <label><input type="radio" name="difficulty" value="medium" checked /> Medium</label>
+        <label><input type="radio" name="difficulty" value="hard" /> Hard</label>
       </fieldset>
       <div id="board" role="group" aria-label="Game board">
         <button class="cell" data-position="0"></button>

@@ -41,7 +41,7 @@ export function createLocalStorageClient(storage: Storage): GameStorage {
   return {
     loadState: async () => read(),
     finish: (outcome) => update((data) => recordOutcome(data, outcome)),
-    pause: (state, mode) => update((data) => pauseGame(data, state, mode)),
+    pause: (state, mode, difficulty) => update((data) => pauseGame(data, state, mode, difficulty)),
     discardPaused: () => update(clearPausedGame),
     resetScores: () => update(resetScores),
   };

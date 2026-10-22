@@ -1,6 +1,6 @@
 # Project Rules — Tic-Tac-Toe
 
-These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version), [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume) and [tic-tac-toe-github.md](../tic-tac-toe-github.md) (GitHub Pages hosting).
+These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version), [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume), [tic-tac-toe-github.md](../tic-tac-toe-github.md) (GitHub Pages hosting) and [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md) (computer difficulty levels).
 
 ## 1. Technology
 
@@ -17,8 +17,8 @@ These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.m
 
 ```
 src/game.ts       Core rules and state (pure, no Node/browser APIs)
-src/computer.ts   Minimax computer opponent (pure)
-src/mode.ts       Shared GameMode type and COMPUTER_PLAYER constant
+src/computer.ts   Computer opponent with Easy / Medium / Hard (minimax) levels (pure)
+src/mode.ts       Shared GameMode, Difficulty and COMPUTER_PLAYER
 src/storage/      model.ts (pure scores/paused-game model and validation), gameStore.ts (Node-only JSON file store)
 src/server/       node:http API for the browser (+ serves dist/ in production)
 src/cli.ts        Console UI (Node only)
@@ -45,13 +45,13 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - A full board with no winner is a draw. A full board with a winning line is a win, not a draw.
 - No moves into occupied cells, outside `0–8`, with non-integers, or after the game has ended.
 - After a win or draw, `currentPlayer` stays the player who made the last move.
-- Vs-computer mode: the human is X, the computer is O. The computer is intentionally beatable and picks the first available position.
+- Vs-computer mode: the human is X, the computer is O. The computer has three levels (see [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md)): Easy (random), Medium (default: wins and blocks, otherwise random) and Hard (minimax, never loses). Only Hard is unbeatable.
 
 ## 3b. Scores and pause
 
 - Only two identities exist: Player 1 (X) and Player 2 (O). No accounts or names.
 - Only finished **two-player** games are recorded (`shouldRecord`), exactly once, together with clearing any saved paused game. Games against the computer never change the scores.
-- A game can be paused only while in progress (both modes). The paused game (board, turn, mode) is saved, loaded on the next start, and resumed or discarded by the user. Nothing is saved unless the user pauses.
+- A game can be paused only while in progress (both modes). The paused game (board, turn, mode and computer difficulty) is saved, loaded on the next start, and resumed or discarded by the user. Nothing is saved unless the user pauses. A saved game without a difficulty loads with the default (Medium).
 - The scores are shown above the board in the web UI and printed at the start and end of a console game.
 - Saved data is never trusted: it is validated on load (`parseGameData`), corrupt files are moved aside, and storage failures must never stop a game from being played.
 - Writes are atomic and serialized.
@@ -69,7 +69,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - Keyboard accessible (native `<button>`s, visible focus), responsive, with an `aria-live` status line.
 - Block input while the computer is "thinking"; changing mode or resetting cancels a pending computer move.
 - Highlight the winning line; disable occupied cells and the whole board when the game is over.
-- Out of scope: online multiplayer, accounts, difficulty levels.
+- Out of scope: online multiplayer, accounts, adaptive difficulty. (The three fixed computer levels were added later, see [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md).)
 - Scores panel sits directly above the board; Pause/Resume, New game and Reset scores are native buttons. Confirm before discarding a saved paused game or resetting scores. The game must stay playable when storage is unavailable (blocked `localStorage` or no API: Pause and scores disabled with a visible note).
 
 ## 6. Testing

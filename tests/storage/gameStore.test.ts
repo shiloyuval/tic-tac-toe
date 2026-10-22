@@ -30,14 +30,15 @@ describe("createGameStore", () => {
   });
 
   it("keeps a paused game across store instances", async () => {
-    await store.pauseGame(midGame, "two-players");
+    await store.pauseGame(midGame, "computer", "hard");
     const reloaded = await createGameStore(file).load();
     expect(reloaded.pausedGame?.state).toEqual(midGame);
-    expect(reloaded.pausedGame?.mode).toBe("two-players");
+    expect(reloaded.pausedGame?.mode).toBe("computer");
+    expect(reloaded.pausedGame?.difficulty).toBe("hard");
   });
 
   it("records a finished game and clears the paused game in one step", async () => {
-    await store.pauseGame(midGame, "two-players");
+    await store.pauseGame(midGame, "two-players", "medium");
     const data = await store.finishGame("player2-win");
     expect(data.scores.player2Wins).toBe(1);
     expect(data.pausedGame).toBeNull();
@@ -46,7 +47,7 @@ describe("createGameStore", () => {
 
   it("discards a paused game without touching the scores", async () => {
     await store.finishGame("draw");
-    await store.pauseGame(midGame, "computer");
+    await store.pauseGame(midGame, "computer", "easy");
     const data = await store.discardPausedGame();
     expect(data.pausedGame).toBeNull();
     expect(data.scores.draws).toBe(1);
@@ -54,7 +55,7 @@ describe("createGameStore", () => {
 
   it("resets the scores but keeps the paused game", async () => {
     await store.finishGame("draw");
-    await store.pauseGame(midGame, "two-players");
+    await store.pauseGame(midGame, "two-players", "medium");
     const data = await store.resetScores();
     expect(data.scores).toEqual({ player1Wins: 0, player2Wins: 0, draws: 0 });
     expect(data.pausedGame).not.toBeNull();
@@ -62,7 +63,7 @@ describe("createGameStore", () => {
 
   it("rejects pausing a finished game", async () => {
     const won = [0, 3, 1, 4, 2].reduce(makeMove, createGame());
-    await expect(store.pauseGame(won, "two-players")).rejects.toThrow();
+    await expect(store.pauseGame(won, "two-players", "medium")).rejects.toThrow();
   });
 
   it("does not lose concurrent updates", async () => {

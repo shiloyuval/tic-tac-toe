@@ -1,8 +1,9 @@
 import { chooseComputerMove } from "../computer.js";
+import type { RandomSource } from "../computer.js";
 import { createGame, getGameResult, makeMove } from "../game.js";
 import type { GameState } from "../game.js";
-import { COMPUTER_PLAYER } from "../mode.js";
-import type { GameMode } from "../mode.js";
+import { COMPUTER_PLAYER, DEFAULT_DIFFICULTY } from "../mode.js";
+import type { Difficulty, GameMode } from "../mode.js";
 import { outcomeOf, shouldRecord } from "../storage/model.js";
 import type { GameData, Scores } from "../storage/model.js";
 import type { GameStorage } from "./gameStorage.js";
@@ -12,6 +13,7 @@ export type Persistence = "loading" | "available" | "unavailable";
 export interface ViewModel {
   state: GameState;
   mode: GameMode;
+  difficulty: Difficulty;
   message: string;
   locked: boolean;
   scores: Scores | null;
@@ -26,6 +28,7 @@ export interface Controller {
   init(): Promise<void>;
   playerMove(position: number): void;
   setMode(mode: GameMode): void;
+  setDifficulty(difficulty: Difficulty): void;
   reset(): void;
   pause(): Promise<void>;
   resume(): void;
@@ -37,6 +40,7 @@ export interface ControllerOptions {
   storage: GameStorage | null;
   onChange: () => void;
   delayMs?: number;
+  random?: RandomSource;
 }
 
 export const COMPUTER_DELAY_MS = 400;
@@ -49,9 +53,11 @@ export function createController({
   storage,
   onChange,
   delayMs = COMPUTER_DELAY_MS,
+  random = Math.random,
 }: ControllerOptions): Controller {
   let state = createGame();
   let mode: GameMode = "two-players";
+  let difficulty: Difficulty = DEFAULT_DIFFICULTY;
   let error = "";
   let thinking = false;
   let generation = 0;
@@ -110,7 +116,7 @@ export function createController({
     setTimeout(() => {
       if (current !== generation) return;
       thinking = false;
-      state = makeMove(state, chooseComputerMove(state));
+      state = makeMove(state, chooseComputerMove(state, difficulty, random));
       if (state.status !== "in-progress") onGameFinished();
       onChange();
     }, delayMs);
@@ -130,6 +136,7 @@ export function createController({
     getViewModel: () => ({
       state,
       mode,
+      difficulty,
       message: paused ? "Game paused. Press Resume to continue." : error || getGameResult(state),
       locked: thinking || paused || persistence === "loading" || state.status !== "in-progress",
       scores,
@@ -150,6 +157,7 @@ export function createController({
         if (data.pausedGame !== null) {
           state = data.pausedGame.state;
           mode = data.pausedGame.mode;
+          difficulty = data.pausedGame.difficulty;
           paused = true;
           hasSavedGame = true;
         }
@@ -179,6 +187,11 @@ export function createController({
       restart();
     },
 
+    setDifficulty(next) {
+      difficulty = next;
+      restart();
+    },
+
     reset: restart,
 
     async pause() {
@@ -191,7 +204,7 @@ export function createController({
       onChange();
 
       try {
-        applyData(await persist((client) => client.pause(state, mode)));
+        applyData(await persist((client) => client.pause(state, mode, difficulty)));
       } catch (cause) {
         error = `Could not save the paused game: ${describeError(cause)}`;
         if (paused) {

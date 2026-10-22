@@ -16,7 +16,7 @@ export function createApiClient(baseUrl = ""): GameStorage {
   return {
     loadState: () => request("GET", "/api/state"),
     finish: (outcome) => request("POST", "/api/finish", { outcome }),
-    pause: (state, mode) => request("PUT", "/api/paused-game", { state, mode }),
+    pause: (state, mode, difficulty) => request("PUT", "/api/paused-game", { state, mode, difficulty }),
     discardPaused: () => request("DELETE", "/api/paused-game"),
     resetScores: () => request("DELETE", "/api/scores"),
   };

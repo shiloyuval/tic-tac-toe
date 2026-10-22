@@ -90,7 +90,7 @@ async function handleApi(
       if (method === "PUT") {
         const request = parsePauseRequest(await readJsonBody(req));
         if (request === null) throw new HttpError(400, "Invalid game to pause.");
-        return sendJson(res, 200, await store.pauseGame(request.state, request.mode));
+        return sendJson(res, 200, await store.pauseGame(request.state, request.mode, request.difficulty));
       }
       requireMethod(method, "DELETE");
       return sendJson(res, 200, await store.discardPausedGame());

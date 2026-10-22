@@ -6,6 +6,8 @@ export interface Elements {
   cells: HTMLButtonElement[];
   status: HTMLElement;
   modeInputs: HTMLInputElement[];
+  difficultyGroup: HTMLElement;
+  difficultyInputs: HTMLInputElement[];
   scoreValues: { player1: HTMLElement; player2: HTMLElement; draws: HTMLElement };
   scoresNote: HTMLElement;
   pauseButton: HTMLButtonElement;
@@ -38,6 +40,10 @@ export function render(els: Elements, vm: ViewModel): void {
   els.status.textContent = vm.message;
   for (const input of els.modeInputs) {
     input.checked = input.value === vm.mode;
+  }
+  els.difficultyGroup.hidden = vm.mode !== "computer";
+  for (const input of els.difficultyInputs) {
+    input.checked = input.value === vm.difficulty;
   }
 
   els.scoreValues.player1.textContent = scoreText(vm.scores, "player1Wins");

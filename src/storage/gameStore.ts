@@ -1,14 +1,14 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { GameState } from "../game.js";
-import type { GameMode } from "../mode.js";
+import type { Difficulty, GameMode } from "../mode.js";
 import * as model from "./model.js";
 import type { GameData, Outcome } from "./model.js";
 
 export interface GameStore {
   load(): Promise<GameData>;
   finishGame(outcome: Outcome): Promise<GameData>;
-  pauseGame(state: GameState, mode: GameMode): Promise<GameData>;
+  pauseGame(state: GameState, mode: GameMode, difficulty: Difficulty): Promise<GameData>;
   discardPausedGame(): Promise<GameData>;
   resetScores(): Promise<GameData>;
 }
@@ -68,7 +68,7 @@ export function createGameStore(filePath: string = defaultDataFile()): GameStore
   return {
     load: () => enqueue(readData),
     finishGame: (outcome) => update((data) => model.recordOutcome(data, outcome)),
-    pauseGame: (state, mode) => update((data) => model.pauseGame(data, state, mode)),
+    pauseGame: (state, mode, difficulty) => update((data) => model.pauseGame(data, state, mode, difficulty)),
     discardPausedGame: () => update(model.clearPausedGame),
     resetScores: () => update(model.resetScores),
   };

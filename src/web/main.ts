@@ -1,5 +1,5 @@
 import "./styles.css";
-import type { GameMode } from "../mode.js";
+import type { Difficulty, GameMode } from "../mode.js";
 import { createApiClient } from "./apiClient.js";
 import { createController } from "./controller.js";
 import type { GameStorage } from "./gameStorage.js";
@@ -24,6 +24,10 @@ const els: Elements = {
   cells: Array.from(document.querySelectorAll<HTMLButtonElement>("[data-position]")),
   status: requireElement<HTMLElement>("#status"),
   modeInputs: Array.from(document.querySelectorAll<HTMLInputElement>("input[name='mode']")),
+  difficultyGroup: requireElement<HTMLElement>("#difficulty"),
+  difficultyInputs: Array.from(
+    document.querySelectorAll<HTMLInputElement>("input[name='difficulty']")
+  ),
   scoreValues: {
     player1: requireElement<HTMLElement>("#score-player1"),
     player2: requireElement<HTMLElement>("#score-player2"),
@@ -52,6 +56,13 @@ requireElement<HTMLElement>("#board").addEventListener("click", (event) => {
 for (const input of els.modeInputs) {
   input.addEventListener("change", () => {
     if (confirmDiscardingSavedGame()) controller.setMode(input.value as GameMode);
+    else render(els, controller.getViewModel());
+  });
+}
+
+for (const input of els.difficultyInputs) {
+  input.addEventListener("change", () => {
+    if (confirmDiscardingSavedGame()) controller.setDifficulty(input.value as Difficulty);
     else render(els, controller.getViewModel());
   });
 }

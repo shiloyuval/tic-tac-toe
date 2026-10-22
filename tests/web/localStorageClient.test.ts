@@ -46,15 +46,16 @@ describe("createLocalStorageClient", () => {
   });
 
   it("keeps a paused game for a new client on the same storage", async () => {
-    await createLocalStorageClient(storage).pause(midGame, "two-players");
+    await createLocalStorageClient(storage).pause(midGame, "computer", "easy");
     const loaded = await createLocalStorageClient(storage).loadState();
     expect(loaded.pausedGame?.state).toEqual(midGame);
-    expect(loaded.pausedGame?.mode).toBe("two-players");
+    expect(loaded.pausedGame?.mode).toBe("computer");
+    expect(loaded.pausedGame?.difficulty).toBe("easy");
   });
 
   it("records a finished game and clears the paused game together", async () => {
     const client = createLocalStorageClient(storage);
-    await client.pause(midGame, "two-players");
+    await client.pause(midGame, "two-players", "medium");
     const data = await client.finish("player1-win");
     expect(data.scores.player1Wins).toBe(1);
     expect(data.pausedGame).toBeNull();
@@ -64,7 +65,7 @@ describe("createLocalStorageClient", () => {
   it("discards a paused game without touching the scores", async () => {
     const client = createLocalStorageClient(storage);
     await client.finish("draw");
-    await client.pause(midGame, "computer");
+    await client.pause(midGame, "computer", "hard");
     const data = await client.discardPaused();
     expect(data.pausedGame).toBeNull();
     expect(data.scores.draws).toBe(1);
@@ -73,7 +74,7 @@ describe("createLocalStorageClient", () => {
   it("resets the scores but keeps the paused game", async () => {
     const client = createLocalStorageClient(storage);
     await client.finish("player2-win");
-    await client.pause(midGame, "two-players");
+    await client.pause(midGame, "two-players", "medium");
     const data = await client.resetScores();
     expect(data.scores).toEqual({ player1Wins: 0, player2Wins: 0, draws: 0 });
     expect(data.pausedGame).not.toBeNull();
@@ -81,7 +82,9 @@ describe("createLocalStorageClient", () => {
 
   it("rejects pausing a finished game", async () => {
     const won = [0, 3, 1, 4, 2].reduce(makeMove, createGame());
-    await expect(createLocalStorageClient(storage).pause(won, "two-players")).rejects.toThrow();
+    await expect(
+      createLocalStorageClient(storage).pause(won, "two-players", "medium")
+    ).rejects.toThrow();
   });
 
   it("starts fresh and keeps a copy when the stored value is corrupt", async () => {

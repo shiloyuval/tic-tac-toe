@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getWinningLine } from "../../src/game.js";
 import type { Board, GameState } from "../../src/game.js";
-import type { GameMode } from "../../src/mode.js";
+import type { Difficulty, GameMode } from "../../src/mode.js";
 import { createEmptyGameData, pauseGame, recordOutcome } from "../../src/storage/model.js";
 import type { GameData, Outcome } from "../../src/storage/model.js";
 import type { GameStorage } from "../../src/web/gameStorage.js";
@@ -28,8 +28,8 @@ function createFakeApi(initial: GameData = createEmptyGameData()): FakeApi {
     async finish(outcome: Outcome) {
       return call("finish", () => (api.data = recordOutcome(api.data, outcome)));
     },
-    async pause(state: GameState, mode: GameMode) {
-      return call("pause", () => (api.data = pauseGame(api.data, state, mode)));
+    async pause(state: GameState, mode: GameMode, difficulty: Difficulty) {
+      return call("pause", () => (api.data = pauseGame(api.data, state, mode, difficulty)));
     },
     async discardPaused() {
       return call("discardPaused", () => (api.data = { ...api.data, pausedGame: null }));
@@ -47,8 +47,12 @@ function createFakeApi(initial: GameData = createEmptyGameData()): FakeApi {
   return api;
 }
 
-async function startController(api: FakeApi | null, delayMs = 100): Promise<Controller> {
-  const controller = createController({ storage: api, onChange: () => {}, delayMs });
+async function startController(
+  api: FakeApi | null,
+  delayMs = 100,
+  random?: () => number
+): Promise<Controller> {
+  const controller = createController({ storage: api, onChange: () => {}, delayMs, random });
   await controller.init();
   return controller;
 }
@@ -129,9 +133,10 @@ describe("web controller (vs computer)", () => {
     expect(c.getViewModel().state.board.every((cell) => cell === null)).toBe(true);
   });
 
-  it("can lose to a human who plays a winning line", async () => {
-    const c = await startController(null, 1);
+  it("can lose to a human who plays a winning line on easy", async () => {
+    const c = await startController(null, 1, () => 0);
     c.setMode("computer");
+    c.setDifficulty("easy");
     c.playerMove(4);
     vi.advanceTimersByTime(1);
     c.playerMove(2);
@@ -140,6 +145,65 @@ describe("web controller (vs computer)", () => {
 
     expect(c.getViewModel().state.status).toBe("won");
     expect(c.getViewModel().state.winner).toBe("X");
+  });
+
+  it("never loses on hard against varied human move sequences", async () => {
+    const c = await startController(null, 1);
+    c.setMode("computer");
+    c.setDifficulty("hard");
+    for (let seed = 0; seed < 20; seed++) {
+      c.reset();
+      let n = seed;
+      while (c.getViewModel().state.status === "in-progress") {
+        const empty = c
+          .getViewModel()
+          .state.board.flatMap((cell, i) => (cell === null ? [i] : []));
+        c.playerMove(empty[n % empty.length] as number);
+        n += 3;
+        vi.advanceTimersByTime(1);
+      }
+      expect(c.getViewModel().state.winner).not.toBe("X");
+    }
+  });
+});
+
+describe("web controller (difficulty)", () => {
+  it("starts on medium", async () => {
+    const c = await startController(null);
+    expect(c.getViewModel().difficulty).toBe("medium");
+  });
+
+  it("changing the difficulty starts a new game and cancels a pending computer move", async () => {
+    const c = await startController(null);
+    c.setMode("computer");
+    c.playerMove(0);
+    c.setDifficulty("hard");
+    vi.advanceTimersByTime(200);
+
+    const vm = c.getViewModel();
+    expect(vm.difficulty).toBe("hard");
+    expect(vm.state.board.every((cell) => cell === null)).toBe(true);
+    expect(vm.locked).toBe(false);
+  });
+
+  it("plays with the selected level", async () => {
+    // X threatens 2. Medium blocks it; easy with a last-cell random source does not.
+    const medium = await startController(null, 1, () => 0.999);
+    medium.setMode("computer");
+    playMoves(medium, [0]);
+    vi.advanceTimersByTime(1);
+    playMoves(medium, [1]);
+    vi.advanceTimersByTime(1);
+    expect(medium.getViewModel().state.board[2]).toBe("O");
+
+    const easy = await startController(null, 1, () => 0.999);
+    easy.setMode("computer");
+    easy.setDifficulty("easy");
+    playMoves(easy, [0]);
+    vi.advanceTimersByTime(1);
+    playMoves(easy, [1]);
+    vi.advanceTimersByTime(1);
+    expect(easy.getViewModel().state.board[2]).toBeNull();
   });
 });
 
@@ -248,6 +312,21 @@ describe("web controller (pause and resume)", () => {
     expect(vm.state.board[8]).toBe("X");
     expect(vm.state.currentPlayer).toBe("O");
     expect(vm.hasSavedGame).toBe(true);
+  });
+
+  it("saves the difficulty and restores it when the paused game is loaded", async () => {
+    const api = createFakeApi();
+    const first = await startController(api);
+    first.setMode("computer");
+    first.setDifficulty("hard");
+    await first.idle();
+    first.playerMove(0);
+    await first.pause();
+    expect(api.data.pausedGame?.difficulty).toBe("hard");
+
+    const second = await startController(api);
+    expect(second.getViewModel().mode).toBe("computer");
+    expect(second.getViewModel().difficulty).toBe("hard");
   });
 
   it("resumes the game and removes the saved copy", async () => {

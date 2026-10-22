@@ -62,6 +62,8 @@ h1 { margin: 0; }
 
 .modes label { cursor: pointer; }
 
+.modes[hidden] { display: none; }
+
 #board {
   width: 100%;
   display: grid;

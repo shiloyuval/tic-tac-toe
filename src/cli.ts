@@ -3,8 +3,8 @@ import type { Interface } from "node:readline/promises";
 import { chooseComputerMove } from "./computer.js";
 import { createGame, getGameResult, makeMove } from "./game.js";
 import type { Board, GameState } from "./game.js";
-import { COMPUTER_PLAYER } from "./mode.js";
-import type { GameMode } from "./mode.js";
+import { COMPUTER_PLAYER, DEFAULT_DIFFICULTY } from "./mode.js";
+import type { Difficulty, GameMode } from "./mode.js";
 import { createGameStore } from "./storage/gameStore.js";
 import type { GameStore } from "./storage/gameStore.js";
 import { formatScores, outcomeOf, shouldRecord } from "./storage/model.js";
@@ -16,6 +16,7 @@ type TurnResult = GameState | typeof PAUSE | null;
 
 interface Session {
   mode: GameMode;
+  difficulty: Difficulty;
   state: GameState;
 }
 
@@ -45,6 +46,23 @@ async function chooseMode(readLine: ReadLine): Promise<GameMode | null> {
   }
 }
 
+async function chooseDifficulty(readLine: ReadLine): Promise<Difficulty | null> {
+  console.log("\nChoose the computer's difficulty:");
+  console.log("  1) Easy (plays randomly)");
+  console.log("  2) Medium (wins and blocks when it can, otherwise random)");
+  console.log("  3) Hard (unbeatable)");
+
+  while (true) {
+    const answer = await readLine("Enter 1, 2 or 3: ");
+    if (answer === null) return null;
+    const choice = answer.trim();
+    if (choice === "1") return "easy";
+    if (choice === "2") return "medium";
+    if (choice === "3") return "hard";
+    console.log(`\n"${choice}" is not a valid choice.\n`);
+  }
+}
+
 async function playHumanTurn(state: GameState, readLine: ReadLine): Promise<TurnResult> {
   const answer = await readLine(
     `Player ${state.currentPlayer}, choose a position (0-8) or p to pause: `
@@ -66,8 +84,8 @@ async function playHumanTurn(state: GameState, readLine: ReadLine): Promise<Turn
   }
 }
 
-function playComputerTurn(state: GameState): GameState {
-  const position = chooseComputerMove(state);
+function playComputerTurn(state: GameState, difficulty: Difficulty): GameState {
+  const position = chooseComputerMove(state, difficulty);
   console.log(`Computer (${state.currentPlayer}) plays position ${position}.\n`);
   return makeMove(state, position);
 }
@@ -136,12 +154,14 @@ async function startSession(
     await discardSavedGame(store);
     if (choice === "resume") {
       console.log("\nResuming the paused game.");
-      return { mode: paused.mode, state: paused.state };
+      return { mode: paused.mode, difficulty: paused.difficulty, state: paused.state };
     }
   }
 
   const mode = await chooseMode(readLine);
-  return mode === null ? null : { mode, state: createGame() };
+  if (mode === null) return null;
+  const difficulty = mode === "computer" ? await chooseDifficulty(readLine) : DEFAULT_DIFFICULTY;
+  return difficulty === null ? null : { mode, difficulty, state: createGame() };
 }
 
 export async function runCli(store: GameStore = createGameStore()): Promise<void> {
@@ -173,7 +193,7 @@ export async function runCli(store: GameStore = createGameStore()): Promise<void
       return;
     }
 
-    const { mode } = session;
+    const { mode, difficulty } = session;
     let { state } = session;
     console.log("\nEnter a position (0-8) to place your symbol, or p to pause and save the game.\n");
 
@@ -182,7 +202,7 @@ export async function runCli(store: GameStore = createGameStore()): Promise<void
       console.log(`\n${getGameResult(state)}`);
 
       if (mode === "computer" && state.currentPlayer === COMPUTER_PLAYER) {
-        state = playComputerTurn(state);
+        state = playComputerTurn(state, difficulty);
         continue;
       }
 
@@ -193,7 +213,7 @@ export async function runCli(store: GameStore = createGameStore()): Promise<void
       }
       if (next === PAUSE) {
         try {
-          await store.pauseGame(state, mode);
+          await store.pauseGame(state, mode, difficulty);
           console.log("\nGame paused and saved. Start the game again to resume it.");
           return;
         } catch (error) {

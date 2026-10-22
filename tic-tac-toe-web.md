@@ -71,7 +71,7 @@ Framework-free and DOM-free so it is unit-testable.
   - human move updates the board and switches turn;
   - occupied cell and post-game moves yield an error and no state change;
   - in computer mode the computer replies as O and input is blocked while it thinks;
-  - a player can beat the computer (a play-through against its predictable move policy);
+  - a player can beat the computer on Easy (a play-through with a fixed random source) and never beats it on Hard;
   - reset and mode change start a fresh game.
 - Optional: a DOM render test with `jsdom` / `happy-dom` (dev dependency) and/or a Playwright smoke test.
 
@@ -85,7 +85,7 @@ Framework-free and DOM-free so it is unit-testable.
 ## 5. Acceptance criteria
 
 - [ ] `npm run dev:web` opens a playable game in the browser.
-- [ ] Both modes work: two players, and vs. the beatable computer as O.
+- [ ] Both modes work: two players, and vs. the computer as O (difficulty levels were added later, see [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md)).
 - [ ] Illegal moves are impossible or clearly reported; no moves after game end.
 - [ ] The winner, draw and current turn are always shown; the winning line is highlighted.
 - [ ] "New game" resets the board; changing mode resets the game.
@@ -95,4 +95,4 @@ Framework-free and DOM-free so it is unit-testable.
 
 ## 6. Out of scope
 
-Online multiplayer, accounts, difficulty levels, and animations beyond simple CSS transitions. (Persistence was added later; see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md).)
+Online multiplayer, accounts, adaptive difficulty, and animations beyond simple CSS transitions. (Persistence and the three fixed difficulty levels were added later; see [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md) and [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md).)

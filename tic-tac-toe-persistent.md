@@ -3,6 +3,7 @@
 ## Related plans
 
 - Hosting and browser storage: [tic-tac-toe-github.md](./tic-tac-toe-github.md). The web build now keeps scores in `localStorage`; the Node server described here is used by the console game and by `--mode api` builds.
+- Computer difficulty: [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md). A paused game now also stores its `difficulty` (`pauseGame(data, state, mode, difficulty, now)`, `pause(state, mode, difficulty)`, body field `difficulty`); a missing or unknown value loads as `"medium"`.
 
 ## 1. Mission
 

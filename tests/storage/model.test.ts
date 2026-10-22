@@ -7,6 +7,7 @@ import {
   outcomeOf,
   parseGameData,
   parseInProgressState,
+  parsePauseRequest,
   pauseGame,
   recordOutcome,
   resetScores,
@@ -58,10 +59,20 @@ describe("recordOutcome", () => {
 describe("pauseGame", () => {
   const now = new Date("2026-01-01T10:00:00.000Z");
 
-  it("stores the state, mode and time", () => {
+  it("stores the state, mode, difficulty and time", () => {
     const state = play(0, 4);
-    const data = pauseGame(createEmptyGameData(), state, "computer", now);
-    expect(data.pausedGame).toEqual({ state, mode: "computer", pausedAt: now.toISOString() });
+    const data = pauseGame(createEmptyGameData(), state, "computer", "hard", now);
+    expect(data.pausedGame).toEqual({
+      state,
+      mode: "computer",
+      difficulty: "hard",
+      pausedAt: now.toISOString(),
+    });
+  });
+
+  it("uses the default difficulty when none is given", () => {
+    const data = pauseGame(createEmptyGameData(), play(0), "computer");
+    expect(data.pausedGame?.difficulty).toBe("medium");
   });
 
   it("rejects finished games", () => {
@@ -125,5 +136,42 @@ describe("parseGameData", () => {
     const data = parseGameData(broken);
     expect(data.pausedGame).toBeNull();
     expect(data.scores.player1Wins).toBe(1);
+  });
+
+  it("keeps the saved difficulty", () => {
+    const hard = pauseGame(createEmptyGameData(), play(0, 4), "computer", "hard");
+    expect(parseGameData(JSON.parse(JSON.stringify(hard))).pausedGame?.difficulty).toBe("hard");
+  });
+
+  it("falls back to the default difficulty for old or invalid saves", () => {
+    const withoutLevel = JSON.parse(JSON.stringify(valid));
+    delete withoutLevel.pausedGame.difficulty;
+    expect(parseGameData(withoutLevel).pausedGame?.difficulty).toBe("medium");
+
+    const invalidLevel = { ...valid, pausedGame: { ...valid.pausedGame, difficulty: "insane" } };
+    expect(parseGameData(invalidLevel).pausedGame?.difficulty).toBe("medium");
+  });
+});
+
+describe("parsePauseRequest", () => {
+  const state = play(0, 4);
+
+  it("accepts a valid request with a difficulty", () => {
+    expect(parsePauseRequest({ state, mode: "computer", difficulty: "easy" })).toEqual({
+      state,
+      mode: "computer",
+      difficulty: "easy",
+    });
+  });
+
+  it("uses the default difficulty when it is missing or unknown", () => {
+    expect(parsePauseRequest({ state, mode: "computer" })?.difficulty).toBe("medium");
+    expect(parsePauseRequest({ state, mode: "computer", difficulty: 3 })?.difficulty).toBe("medium");
+  });
+
+  it("rejects an invalid mode or state", () => {
+    expect(parsePauseRequest({ state, mode: "teams" })).toBeNull();
+    expect(parsePauseRequest({ state: xWin, mode: "computer" })).toBeNull();
+    expect(parsePauseRequest(null)).toBeNull();
   });
 });

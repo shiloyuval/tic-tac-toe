@@ -52,11 +52,18 @@ describe("game API", () => {
   });
 
   it("pauses, loads and discards a game", async () => {
-    const paused = await send("PUT", "/api/paused-game", { state: midGame, mode: "two-players" });
+    const paused = await send("PUT", "/api/paused-game", {
+      state: midGame,
+      mode: "computer",
+      difficulty: "hard",
+    });
     expect(paused.status).toBe(200);
 
-    const loaded = (await (await send("GET", "/api/state")).json()) as { pausedGame: { state: unknown } };
+    const loaded = (await (await send("GET", "/api/state")).json()) as {
+      pausedGame: { state: unknown; difficulty: string };
+    };
     expect(loaded.pausedGame.state).toEqual(midGame);
+    expect(loaded.pausedGame.difficulty).toBe("hard");
 
     const discarded = (await (await send("DELETE", "/api/paused-game")).json()) as { pausedGame: unknown };
     expect(discarded.pausedGame).toBeNull();

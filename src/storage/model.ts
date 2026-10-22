@@ -1,6 +1,7 @@
 import { checkWinner, isBoardFull } from "../game.js";
 import type { Board, Cell, GameState, Player } from "../game.js";
-import type { GameMode } from "../mode.js";
+import { DEFAULT_DIFFICULTY, DIFFICULTIES } from "../mode.js";
+import type { Difficulty, GameMode } from "../mode.js";
 
 export type Outcome = "player1-win" | "player2-win" | "draw";
 
@@ -13,6 +14,7 @@ export interface Scores {
 export interface PausedGame {
   state: GameState;
   mode: GameMode;
+  difficulty: Difficulty;
   pausedAt: string;
 }
 
@@ -25,6 +27,7 @@ export interface GameData {
 export interface PauseRequest {
   state: GameState;
   mode: GameMode;
+  difficulty: Difficulty;
 }
 
 const GAME_MODES: readonly GameMode[] = ["two-players", "computer"];
@@ -64,13 +67,14 @@ export function pauseGame(
   data: GameData,
   state: GameState,
   mode: GameMode,
+  difficulty: Difficulty = DEFAULT_DIFFICULTY,
   now: Date = new Date()
 ): GameData {
   const valid = parseInProgressState(state);
   if (valid === null) {
     throw new Error("Only a valid game that is in progress can be paused.");
   }
-  return { ...data, pausedGame: { state: valid, mode, pausedAt: now.toISOString() } };
+  return { ...data, pausedGame: { state: valid, mode, difficulty, pausedAt: now.toISOString() } };
 }
 
 export function clearPausedGame(data: GameData): GameData {
@@ -95,6 +99,10 @@ function isCount(value: unknown): value is number {
 
 export function parseMode(value: unknown): GameMode | null {
   return GAME_MODES.find((mode) => mode === value) ?? null;
+}
+
+export function parseDifficulty(value: unknown): Difficulty | null {
+  return DIFFICULTIES.find((difficulty) => difficulty === value) ?? null;
 }
 
 export function parseOutcome(value: unknown): Outcome | null {
@@ -125,11 +133,13 @@ export function parseInProgressState(value: unknown): GameState | null {
   return { board: [...board] as Board, currentPlayer: expectedPlayer, status: "in-progress", winner: null };
 }
 
+// A missing or unknown level (for example in a game saved before levels existed) uses the default.
 export function parsePauseRequest(value: unknown): PauseRequest | null {
   if (!isRecord(value)) return null;
   const state = parseInProgressState(value.state);
   const mode = parseMode(value.mode);
-  return state !== null && mode !== null ? { state, mode } : null;
+  if (state === null || mode === null) return null;
+  return { state, mode, difficulty: parseDifficulty(value.difficulty) ?? DEFAULT_DIFFICULTY };
 }
 
 function parsePausedGame(value: unknown): PausedGame | null {
