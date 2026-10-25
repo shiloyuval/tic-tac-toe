@@ -5,7 +5,7 @@ description: "Review code changes in this project against its rules and look for
 
 # Code Review
 
-Review changes for correctness first, then for compliance with the project rules in `.github/copilot-instructions.md` and `tic-tac-toe.md`.
+Review changes for correctness first, then for compliance with the project rules in `.github/copilot-instructions.md` and `design/tic-tac-toe.md`.
 
 ## Procedure
 

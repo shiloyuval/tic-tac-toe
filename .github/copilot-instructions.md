@@ -1,6 +1,6 @@
 # Project Rules — Tic-Tac-Toe
 
-These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../tic-tac-toe-web.md) (web version), [tic-tac-toe-persistent.md](../tic-tac-toe-persistent.md) (scores and pause/resume), [tic-tac-toe-github.md](../tic-tac-toe-github.md) (GitHub Pages hosting) and [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md) (computer difficulty levels).
+These rules apply to all work in this repository. Detailed specs: [tic-tac-toe.md](../design/tic-tac-toe.md) (core game and CLI), [tic-tac-toe-web.md](../design/tic-tac-toe-web.md) (web version), [tic-tac-toe-persistent.md](../design/tic-tac-toe-persistent.md) (scores and pause/resume), [tic-tac-toe-github.md](../design/tic-tac-toe-github.md) (GitHub Pages hosting) and [tic-tac-toe-difficult.md](../design/tic-tac-toe-difficult.md) (computer difficulty levels).
 
 ## 1. Technology
 
@@ -45,7 +45,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - A full board with no winner is a draw. A full board with a winning line is a win, not a draw.
 - No moves into occupied cells, outside `0–8`, with non-integers, or after the game has ended.
 - After a win or draw, `currentPlayer` stays the player who made the last move.
-- Vs-computer mode: the human is X, the computer is O. The computer has three levels (see [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md)): Easy (random), Medium (default: wins and blocks, otherwise random) and Hard (minimax, never loses). Only Hard is unbeatable.
+- Vs-computer mode: the human is X, the computer is O. The computer has three levels (see [tic-tac-toe-difficult.md](../design/tic-tac-toe-difficult.md)): Easy (random), Medium (default: wins and blocks, otherwise random) and Hard (minimax, never loses). Only Hard is unbeatable.
 
 ## 3b. Scores and pause
 
@@ -69,7 +69,7 @@ tests/            Vitest tests (tests/web, tests/storage, tests/server)
 - Keyboard accessible (native `<button>`s, visible focus), responsive, with an `aria-live` status line.
 - Block input while the computer is "thinking"; changing mode or resetting cancels a pending computer move.
 - Highlight the winning line; disable occupied cells and the whole board when the game is over.
-- Out of scope: online multiplayer, accounts, adaptive difficulty. (The three fixed computer levels were added later, see [tic-tac-toe-difficult.md](../tic-tac-toe-difficult.md).)
+- Out of scope: online multiplayer, accounts, adaptive difficulty. (The three fixed computer levels were added later, see [tic-tac-toe-difficult.md](../design/tic-tac-toe-difficult.md).)
 - Scores panel sits directly above the board; Pause/Resume, New game and Reset scores are native buttons. Confirm before discarding a saved paused game or resetting scores. The game must stay playable when storage is unavailable (blocked `localStorage` or no API: Pause and scores disabled with a visible note).
 
 ## 6. Testing

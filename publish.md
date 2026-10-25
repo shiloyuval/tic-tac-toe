@@ -119,7 +119,7 @@ The same build works on other static hosts. For example, on Cloudflare Pages, Ne
 
 These hosts also deploy private repositories on their free plans. In that case the GitHub Actions workflow is not needed.
 
-More detail: [tic-tac-toe-github.md](./tic-tac-toe-github.md) and the "Publish on GitHub Pages" section of [README.md](./README.md).
+More detail: [tic-tac-toe-github.md](./design/tic-tac-toe-github.md) and the "Publish on GitHub Pages" section of [README.md](./README.md).
 
 ## Running the server-backed version locally (optional)
 

@@ -12,8 +12,8 @@ Keep documentation accurate whenever code behavior, commands or structure change
 | File | Content |
 |---|---|
 | `README.md` | How to install, run (console and web), test and build; short feature overview |
-| `tic-tac-toe.md` | Spec for the core game and the CLI |
-| `tic-tac-toe-web.md` | Plan/spec for the web version |
+| `design/tic-tac-toe.md` | Spec for the core game and the CLI |
+| `design/tic-tac-toe-web.md` | Plan/spec for the web version |
 | `.github/copilot-instructions.md` | Project rules, architecture and commands |
 | `package.json` `description` | One-line summary of the project |
 

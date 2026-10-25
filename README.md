@@ -51,7 +51,7 @@ When you play against the computer (you are X, it is O) you choose a level:
 | Medium (default) | Wins or blocks when it can, otherwise plays randomly. Beatable with a fork. |
 | Hard | Perfect play (minimax). It never loses. |
 
-In the console you are asked for the level after choosing the computer mode. In the browser the level selector appears next to the mode selector; changing the level starts a new game. A paused game resumes at the same level. See [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md).
+In the console you are asked for the level after choosing the computer mode. In the browser the level selector appears next to the mode selector; changing the level starts a new game. A paused game resumes at the same level. See [tic-tac-toe-difficult.md](./design/tic-tac-toe-difficult.md).
 
 ## Publish on GitHub Pages
 
@@ -85,4 +85,4 @@ tests/                              Vitest tests
 .github/workflows/deploy.yml        Test, build and deploy to GitHub Pages
 ```
 
-More detail: [tic-tac-toe.md](./tic-tac-toe.md), [tic-tac-toe-web.md](./tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./tic-tac-toe-persistent.md), [tic-tac-toe-github.md](./tic-tac-toe-github.md), [tic-tac-toe-difficult.md](./tic-tac-toe-difficult.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).
+More detail: [tic-tac-toe.md](./design/tic-tac-toe.md), [tic-tac-toe-web.md](./design/tic-tac-toe-web.md), [tic-tac-toe-persistent.md](./design/tic-tac-toe-persistent.md), [tic-tac-toe-github.md](./design/tic-tac-toe-github.md), [tic-tac-toe-difficult.md](./design/tic-tac-toe-difficult.md) and the project rules in [.github/copilot-instructions.md](./.github/copilot-instructions.md).
